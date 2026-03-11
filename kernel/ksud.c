@@ -29,6 +29,7 @@
 #include "allowlist.h"
 #include "arch.h"
 #include "klog.h" // IWYU pragma: keep
+#include "ksu.h"
 #include "ksud.h"
 #include "kprobes.h"
 #include "kernel_compat.h"
@@ -638,6 +639,10 @@ static void stop_execve_hook(void)
 static void stop_input_hook(void)
 {
 #ifdef CONFIG_KSU_KPROBES
+    if (ksu_late_loaded) {
+        pr_info("ksud: ksu is late loaded\n");
+        return;
+    }
     kp_handle_ksud_stop(KSU_INPUT_EVENT_KP_HANDLER);
 #else
     if (!ksu_input_hook) {
