@@ -20,8 +20,8 @@ static void remove_uid_from_arr(uid_t uid)
 		if (allow_list_arr[i] == uid) {
 			int remaining = allow_list_pointer - 1 - i;
 			if (remaining > 0) {
-				memmove(&allow_list_arr[i], &allow_list_arr[i + 1],
-						remaining * sizeof(allow_list_arr[0]));
+				memmove(&allow_list_arr[i],
+					&allow_list_arr[i + 1], remaining * sizeof(allow_list_arr[0]));
 			}
 			allow_list_pointer--;
 			allow_list_arr[allow_list_pointer] = -1;
@@ -39,7 +39,7 @@ static void init_default_profiles()
 	default_root_profile.groups_count = 1;
 	default_root_profile.groups[0] = 0;
 	memcpy(&default_root_profile.capabilities.effective, &full_cap,
-		   sizeof(default_root_profile.capabilities.effective));
+	       sizeof(default_root_profile.capabilities.effective));
 	default_root_profile.namespaces = KSU_NS_INHERITED;
 	strcpy(default_root_profile.selinux_domain, KSU_DEFAULT_SELINUX_DOMAIN);
 
@@ -69,7 +69,7 @@ void ksu_show_allow_list(void)
 	rcu_read_lock();
 	list_for_each_entry_rcu (p, &allow_list, list) {
 		pr_info("uid :%d, allow: %d\n", p->profile.current_uid,
-				p->profile.allow_su);
+			p->profile.allow_su);
 	}
 	rcu_read_unlock();
 }
@@ -143,7 +143,7 @@ int ksu_set_app_profile(struct app_profile *profile)
 		++count;
 		// both uid and package must match, otherwise it will break multiple package with different user id
 		if (profile->current_uid == p->profile.current_uid &&
-			!strcmp(profile->key, p->profile.key)) {
+		    !strcmp(profile->key, p->profile.key)) {
 			// found it, just override it all!
 			np = (struct perm_data *)kzalloc(sizeof(struct perm_data), GFP_KERNEL);
 			if (!np) {
@@ -174,13 +174,13 @@ int ksu_set_app_profile(struct app_profile *profile)
 	memcpy(&p->profile, profile, sizeof(*profile));
 	if (profile->allow_su) {
 		pr_info("set root profile, key: %s, uid: %d, gid: %d, context: %s\n",
-				profile->key, profile->current_uid,
-				profile->rp_config.profile.gid,
-				profile->rp_config.profile.selinux_domain);
+			profile->key, profile->current_uid,
+			profile->rp_config.profile.gid,
+			profile->rp_config.profile.selinux_domain);
 	} else {
 		pr_info("set app profile, key: %s, uid: %d, umount modules: %d\n",
-				profile->key, profile->current_uid,
-				profile->nrp_config.profile.umount_modules);
+			profile->key, profile->current_uid,
+			profile->nrp_config.profile.umount_modules);
 	}
 
 	list_add_tail_rcu(&p->list, &allow_list);
@@ -192,12 +192,12 @@ out:
 	if (unlikely(!strcmp(profile->key, "$"))) {
 		// set default non root profile
 		memcpy(&default_non_root_profile, &profile->nrp_config.profile,
-			   sizeof(default_non_root_profile));
+		       sizeof(default_non_root_profile));
 	} else if (unlikely(!strcmp(profile->key, "#"))) {
 		// set default root profile
 		// TODO: Do we really need this?
 		memcpy(&default_root_profile, &profile->rp_config.profile,
-			   sizeof(default_root_profile));
+		       sizeof(default_root_profile));
 	} else if (profile->current_uid <= BITMAP_UID_MAX) {
 		if (profile->allow_su)
 			allow_list_bitmap[profile->current_uid / BITS_PER_BYTE] |=
@@ -237,7 +237,7 @@ bool __ksu_is_allow_uid(uid_t uid)
 	}
 
 	if (likely(ksu_is_manager_appid_valid()) &&
-		unlikely(ksu_get_manager_appid() == uid % PER_USER_RANGE)) {
+	    unlikely(ksu_get_manager_appid() == uid % PER_USER_RANGE)) {
 		// manager is always allowed!
 		return true;
 	}
@@ -247,7 +247,7 @@ bool __ksu_is_allow_uid(uid_t uid)
 
 	if (likely(uid <= BITMAP_UID_MAX)) {
 		return !!(allow_list_bitmap[uid / BITS_PER_BYTE] &
-				  (1 << (uid % BITS_PER_BYTE)));
+			  (1 << (uid % BITS_PER_BYTE)));
 	} else {
 		for (i = 0; i < allow_list_pointer; i++) {
 			if (allow_list_arr[i] == uid)
@@ -271,7 +271,7 @@ bool ksu_uid_should_umount(uid_t uid)
 {
 	struct app_profile profile = { .current_uid = uid };
 	if (likely(ksu_is_manager_appid_valid()) &&
-		unlikely(ksu_get_manager_appid() == uid % PER_USER_RANGE)) {
+	    unlikely(ksu_get_manager_appid() == uid % PER_USER_RANGE)) {
 		// we should not umount on manager!
 		return false;
 	}
@@ -309,7 +309,7 @@ void ksu_get_root_profile(uid_t uid, struct root_profile *profile)
 		if (uid == p->profile.current_uid && p->profile.allow_su) {
 			if (!p->profile.rp_config.use_default) {
 				memcpy(profile, &p->profile.rp_config.profile,
-					   sizeof(*profile));
+				       sizeof(*profile));
 				rcu_read_unlock();
 				return;
 			}
@@ -322,7 +322,8 @@ use_default:
 	memcpy(profile, &default_root_profile, sizeof(*profile));
 }
 
-bool ksu_get_allow_list(int *array, u16 length, u16 *out_length, u16 *out_total, bool allow)
+bool ksu_get_allow_list(int *array, u16 length, u16 *out_length, u16 *out_total,
+			bool allow)
 {
 	struct perm_data *p = NULL;
 	u16 i = 0, j = 0;
@@ -330,7 +331,7 @@ bool ksu_get_allow_list(int *array, u16 length, u16 *out_length, u16 *out_total,
 	list_for_each_entry_rcu (p, &allow_list, list) {
 		// pr_info("get_allow_list uid: %d allow: %d\n", p->uid, p->allow);
 		if (p->profile.allow_su == allow &&
-			!is_uid_manager(p->profile.current_uid)) {
+		    !is_uid_manager(p->profile.current_uid)) {
 			if (j < length) {
 				array[j++] = p->profile.current_uid;
 			}
@@ -348,17 +349,19 @@ bool ksu_get_allow_list(int *array, u16 length, u16 *out_length, u16 *out_total,
 	return true;
 }
 
-
-static void ksu_persistent_allow_list_fn()
+// TODO: move to kernel thread or work queue
+static void do_persistent_allow_list(struct callback_head *_cb)
 {
 	u32 magic = FILE_MAGIC;
 	u32 version = FILE_FORMAT_VERSION;
 	struct perm_data *p = NULL;
 	loff_t off = 0;
 
+	const struct cred *saved = override_creds(ksu_cred);
 	struct file *fp = filp_open(KERNEL_SU_ALLOWLIST, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (IS_ERR(fp)) {
-		pr_err("save_allow_list create file failed: %ld\n", PTR_ERR(fp));
+		pr_err("save_allow_list create file failed: %ld\n",
+		       PTR_ERR(fp));
 		goto out;
 	}
 
@@ -368,55 +371,56 @@ static void ksu_persistent_allow_list_fn()
 		goto close_file;
 	}
 
-	if (kernel_write(fp, &version, sizeof(version), &off) != sizeof(version)) {
+	if (kernel_write(fp, &version, sizeof(version), &off) !=
+	    sizeof(version)) {
 		pr_err("save_allow_list write version failed.\n");
 		goto close_file;
 	}
 
+	mutex_lock(&allowlist_mutex);
 	list_for_each_entry (p, &allow_list, list) {
 		pr_info("save allow list, name: %s uid :%d, allow: %d\n",
-				p->profile.key, p->profile.current_uid, p->profile.allow_su);
+			p->profile.key, p->profile.current_uid,
+			p->profile.allow_su);
 
 		kernel_write(fp, &p->profile, sizeof(p->profile), &off);
 	}
+	mutex_unlock(&allowlist_mutex);
 
 close_file:
 	filp_close(fp, 0);
 out:
-	return;
+	revert_creds(saved);
+	kfree(_cb);
 }
 
-// this is a bit heavier than task work / workqueue but this allows
-// us to have our own context. we give it a full escaped-to-root one.
-static int persistent_allow_list_pre(void *data)
+void ksu_persistent_allow_list(void)
 {
-	pr_info("ksu_persistent_allow_list_fn: pid: %d started\n", current->pid);
+	struct task_struct *tsk;
 
-	// repurpose the mutex they were holding on ksu_persistent_allow_list_fn
-	// since all this does eventually is to call kernel_write
-	// we hit two birds in one stone. exclusive io + exclusive kthread
-	// there wont be a single instance lock, but for what we need, its finee
-	// we just let other threads stall.
-	// 'mutex-trylock-fail-then-return' is detrimental here
-	mutex_lock(&allowlist_mutex);
+	tsk = get_pid_task(find_vpid(1), PIDTYPE_PID);
+	if (!tsk) {
+		pr_err("save_allow_list find init task err\n");
+		return;
+	}
 
-	escape_to_root_forced(); // give permissions for everything
-	ksu_persistent_allow_list_fn();
+	struct callback_head *cb =
+		kzalloc(sizeof(struct callback_head), GFP_KERNEL);
+	if (!cb) {
+		pr_err("save_allow_list alloc cb err\b");
+		goto put_task;
+	}
+	cb->func = do_persistent_allow_list;
+	if (task_work_add(tsk, cb, TWA_RESUME)) {
+		kfree(cb);
+		pr_warn("save_allow_list add task_work failed\n");
+	}
 
-	mutex_unlock(&allowlist_mutex);
-
-	pr_info("ksu_persistent_allow_list_fn: pid: %d exit\n", current->pid);
-	return 0;
+put_task:
+	put_task_struct(tsk);
 }
 
-void ksu_persistent_allow_list()
-{
-	kthread_run(persistent_allow_list_pre, NULL, "allowlist");
-}
-
-// we can leave this synchronous it seems
-// this can be revisited if escaping/deferring is needed.
-void ksu_load_allow_list()
+void ksu_load_allow_list(void)
 {
 	loff_t off = 0;
 	ssize_t ret = 0;
@@ -433,12 +437,13 @@ void ksu_load_allow_list()
 
 	// verify magic
 	if (kernel_read(fp, &magic, sizeof(magic), &off) != sizeof(magic) ||
-		magic != FILE_MAGIC) {
+	    magic != FILE_MAGIC) {
 		pr_err("allowlist file invalid: %d!\n", magic);
 		goto exit;
 	}
 
-	if (kernel_read(fp, &version, sizeof(version), &off) != sizeof(version)) {
+	if (kernel_read(fp, &version, sizeof(version), &off) !=
+	    sizeof(version)) {
 		pr_err("allowlist read version: %d failed\n", version);
 		goto exit;
 	}
@@ -455,8 +460,8 @@ void ksu_load_allow_list()
 			break;
 		}
 
-		pr_info("load_allow_uid, name: %s, uid: %d, allow: %d\n", profile.key,
-				profile.current_uid, profile.allow_su);
+		pr_info("load_allow_uid, name: %s, uid: %d, allow: %d\n",
+			profile.key, profile.current_uid, profile.allow_su);
 		ksu_set_app_profile(&profile);
 	}
 
@@ -465,7 +470,8 @@ exit:
 	filp_close(fp, 0);
 }
 
-void ksu_prune_allowlist(bool (*is_uid_valid)(uid_t, char *, void *), void *data)
+void ksu_prune_allowlist(bool (*is_uid_valid)(uid_t, char *, void *),
+			 void *data)
 {
 	struct perm_data *np = NULL;
 	struct perm_data *n = NULL;

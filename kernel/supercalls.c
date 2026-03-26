@@ -692,8 +692,6 @@ static const struct ksu_ioctl_cmd_map ksu_ioctl_handlers[] = {
 	{ .cmd = 0, .name = NULL, .handler = NULL, .perm_check = NULL } // Sentinel
 };
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 5, 0)
-
 struct ksu_install_fd_tw {
 	struct callback_head cb;
 	int __user *outp;
@@ -731,20 +729,6 @@ static int ksu_handle_fd_request(void __user *arg4)
 
 	return 0;
 }
-#else
-static int ksu_handle_fd_request(void __user *arg4)
-{
-	int fd = ksu_install_fd();
-	pr_info("[%d] install ksu fd: %d\n", current->pid, fd);
-
-	if (copy_to_user(arg4, &fd, sizeof(fd))) {
-		pr_err("install ksu fd reply err\n");
-		close_fd(fd);
-	}
-
-	return 0;
-}
-#endif
 
 // downstream: make sure to pass arg as reference, this can allow us to extend things.
 int ksu_handle_sys_reboot(int magic1, int magic2, unsigned int cmd, void __user **arg)
@@ -753,7 +737,9 @@ int ksu_handle_sys_reboot(int magic1, int magic2, unsigned int cmd, void __user 
 	if (magic1 != KSU_INSTALL_MAGIC1)
 		return 0;
 
+#ifdef CONFIG_KSU_DEBUG
 	pr_info("sys_reboot: intercepted call! magic: 0x%x id: %d\n", magic1, magic2);
+#endif
 
 	// arg4 = (unsigned long)PT_REGS_SYSCALL_PARM4(real_regs);
 	// downstream: dereference arg as arg4 so we can be inline to upstream

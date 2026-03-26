@@ -1,13 +1,4 @@
 // SPDX-License-Identifier: GPL-2.0
-#include <linux/module.h>
-#include <linux/fs.h>
-#include <linux/namei.h>
-#include <linux/fsnotify.h>
-#include <linux/slab.h>
-#include <linux/string.h>
-#include <linux/rculist.h>
-#include <linux/version.h>
-
 #define MASK_SYSTEM (FS_CREATE | FS_MOVE | FS_EVENT_ON_CHILD)
 
 struct watch_dir {

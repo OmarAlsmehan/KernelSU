@@ -188,25 +188,26 @@ loop_start:
 	return 0;
 }
 
-static void unregister_kprobe_thread()
+static void unregister_kprobe_thread(void)
 {
 	kthread_run(unregister_kprobe_function, NULL, "kp_unreg");
 }
 
-static void kp_ksud_init()
+static void kp_ksud_init(void)
 {
+	int ret = 0;
 
 #ifndef CONFIG_KSU_TAMPER_SYSCALL_TABLE
-	int ret = register_kprobe(&sys_reboot_kp); // dont unreg this one
+	ret = register_kprobe(&sys_reboot_kp); // dont unreg this one
 	pr_info("kp_ksud: sys_reboot_kp: %d\n", ret);
 #endif
 
-	int ret2 = register_kretprobe(&sys_newfstat_rp);
-	pr_info("kp_ksud: sys_newfstat_rp: %d\n", ret2);
+	ret = register_kretprobe(&sys_newfstat_rp);
+	pr_info("kp_ksud: sys_newfstat_rp: %d\n", ret);
 
 #if defined(__ARCH_WANT_STAT64) || defined(__ARCH_WANT_COMPAT_STAT64)
-	int ret3 = register_kretprobe(&sys_fstat64_rp);
-	pr_info("kp_ksud: sys_fstat64_rp: %d\n", ret3);
+	ret = register_kretprobe(&sys_fstat64_rp);
+	pr_info("kp_ksud: sys_fstat64_rp: %d\n", ret);
 #endif
 
 	unregister_kprobe_thread();

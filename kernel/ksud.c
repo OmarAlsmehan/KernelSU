@@ -431,12 +431,12 @@ static noinline void ksu_common_newfstat_ret(unsigned long fd_long, void **statb
 
 	new_size = size + ksu_rc_len;
 	pr_info("%s: adding ksu_rc_len: %ld -> %ld \n", __func__, size, new_size);
-		
+
 	if (!copy_to_user(st_size_ptr, &new_size, len))
 		pr_info("%s: added ksu_rc_len \n", __func__);
 	else
 		pr_info("%s: add ksu_rc_len failed: statbuf 0x%lx \n", __func__, (unsigned long)st_size_ptr);
-	
+
 	return;
 }
 
@@ -477,7 +477,7 @@ bool ksu_is_safe_mode()
 
 	if (!safe_mode_flag)
 		return false;
-		
+
 	pr_info("volume keys pressed max times, safe mode detected!\n");
 	already_checked = true;
 	return true;
@@ -490,10 +490,10 @@ static void vol_detector_event(struct input_handle *handle, unsigned int type, u
 
 	if (!value)
 		return;
-	
+
 	if (type != EV_KEY)
 		return;
-	
+
 	if (code == KEY_VOLUMEDOWN) {
 		vol_down_cnt++;
 		pr_info("KEY_VOLUMEDOWN press detected!\n");
@@ -614,7 +614,7 @@ static void stop_input_hook()
 	if (!ksu_input_hook) { return; }
 	ksu_input_hook = false;
 	pr_info("stop input_hook\n");
-	
+
 	vol_detector_exit();
 }
 

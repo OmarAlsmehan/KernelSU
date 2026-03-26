@@ -127,6 +127,8 @@ int __init kernelsu_init(void)
 		pr_err("prepare cred failed!\n");
 	}
 
+	ksu_app_profile_init();
+
 	ksu_feature_init();
 
 	ksu_supercalls_init();
