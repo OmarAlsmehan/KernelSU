@@ -13,6 +13,7 @@
 #include "ksu.h"
 #include "manager.h"
 #include "sucompat.h"
+#include "pkg_observer.h"
 #include "supercalls.h"
 #include "throne_tracker.h"
 #include "su_mount_ns.h"
@@ -40,6 +41,7 @@
 #include "supercalls.c"
 #include "feature.c"
 #include "su_mount_ns.c"
+#include "pkg_observer.c"
 #include "ksud.c"
 #include "file_wrapper.c"
 
