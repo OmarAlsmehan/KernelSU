@@ -13,7 +13,7 @@ static uint8_t sulog_index_next = 0;
 
 static DEFINE_SPINLOCK(sulog_lock);
 
-void sulog_init_heap()
+void sulog_init_heap(void)
 {
 	sulog_buf_ptr = kzalloc(SULOG_BUFSIZ, GFP_KERNEL);
 	if (!sulog_buf_ptr)
@@ -34,7 +34,7 @@ void sulog_init_heap()
  * - for 64-bit we can straight up just use divide
  *
  */
-static inline uint32_t boottime_s_get()
+static inline uint32_t boottime_s_get(void)
 {
 	ktime_t boottime_kt = ktime_get_boottime();
 

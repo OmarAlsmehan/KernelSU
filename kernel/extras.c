@@ -52,7 +52,7 @@ static const struct ksu_feature_handler avc_spoof_handler = {
 	.set_handler = avc_spoof_feature_set,
 };
 
-static int get_sid()
+static int get_sid(void)
 {
 	// dont load at all if we cant get sids
 	int err = security_secctx_to_secid("u:r:su:s0", strlen("u:r:su:s0"), &su_sid);
@@ -189,7 +189,7 @@ void ksu_avc_spoof_enable(void)
 	pr_info("avc_spoof/init: slow_avc_audit spoofing enabled!\n");
 }
 
-void ksu_avc_spoof_late_init()
+void ksu_avc_spoof_late_init(void)
 {
 	boot_completed = true;
 	
@@ -198,14 +198,14 @@ void ksu_avc_spoof_late_init()
 	}
 }
 
-void ksu_avc_spoof_init()
+void ksu_avc_spoof_init(void)
 {
 	if (ksu_register_feature_handler(&avc_spoof_handler)) {
 		pr_err("Failed to register avc spoof feature handler\n");
 	}
 }
 
-void ksu_avc_spoof_exit()
+void ksu_avc_spoof_exit(void)
 {
 	if (ksu_avc_spoof_enabled) {
 		ksu_avc_spoof_disable();

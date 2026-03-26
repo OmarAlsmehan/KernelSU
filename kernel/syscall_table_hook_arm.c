@@ -265,7 +265,7 @@ out:
 	smp_mb(); 
 }
 
-static int ksu_syscall_table_restore()
+static int ksu_syscall_table_restore(void)
 {
 loop_start:
 
@@ -281,12 +281,12 @@ loop_start:
 	return 0;
 }
 
-static void vfs_read_hook_wait_thread()
+static void vfs_read_hook_wait_thread(void)
 {
 	kthread_run(ksu_syscall_table_restore, NULL, "unhook");
 }
 
-static void ksu_syscall_table_hook_init()
+static void ksu_syscall_table_hook_init(void)
 {
 
 	read_and_replace_syscall((void *)&armeabi_reboot, __ARMEABI_reboot, (void *)hook_armeabi_reboot, (void *)sys_call_table);
@@ -303,7 +303,7 @@ static void ksu_syscall_table_hook_init()
 
 static DEFINE_MUTEX(sucompat_toggle_mutex);
 
-static void syscall_table_sucompat_enable()
+static void syscall_table_sucompat_enable(void)
 {
 	mutex_lock(&sucompat_toggle_mutex);
 	read_and_replace_syscall((void *)&armeabi_execve, __ARMEABI_execve, (void *)hook_armeabi_execve, (void *)sys_call_table);
@@ -312,7 +312,7 @@ static void syscall_table_sucompat_enable()
 	mutex_unlock(&sucompat_toggle_mutex);
 }
 
-static void syscall_table_sucompat_disable()
+static void syscall_table_sucompat_disable(void)
 {
 	mutex_lock(&sucompat_toggle_mutex);
 	restore_syscall((void *)&armeabi_execve, __ARMEABI_execve, (void *)hook_armeabi_execve, (void *)sys_call_table);

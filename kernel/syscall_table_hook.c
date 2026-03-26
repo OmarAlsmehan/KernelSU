@@ -369,7 +369,7 @@ out:
 	smp_mb(); 
 }
 
-static int ksu_syscall_table_restore()
+static int ksu_syscall_table_restore(void)
 {
 loop_start:
 
@@ -389,12 +389,12 @@ loop_start:
 	return 0;
 }
 
-static void vfs_read_hook_wait_thread()
+static void vfs_read_hook_wait_thread(void)
 {
 	kthread_run(ksu_syscall_table_restore, NULL, "unhook");
 }
 
-static void ksu_syscall_table_hook_init()
+static void ksu_syscall_table_hook_init(void)
 {
 	read_and_replace_syscall((void *)&aarch64_reboot, __AARCH64_reboot, (void *)hook_aarch64_reboot, (void *)sys_call_table);
 	read_and_replace_syscall((void *)&aarch64_execve, __AARCH64_execve, (void *)hook_aarch64_execve, (void *)sys_call_table);
@@ -422,7 +422,7 @@ static void ksu_syscall_table_hook_init()
 
 static DEFINE_MUTEX(sucompat_toggle_mutex);
 
-static void syscall_table_sucompat_enable()
+static void syscall_table_sucompat_enable(void)
 {
 	mutex_lock(&sucompat_toggle_mutex);
 
@@ -439,7 +439,7 @@ static void syscall_table_sucompat_enable()
 	mutex_unlock(&sucompat_toggle_mutex);
 }
 
-static void syscall_table_sucompat_disable()
+static void syscall_table_sucompat_disable(void)
 {
 	mutex_lock(&sucompat_toggle_mutex);
 
