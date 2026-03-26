@@ -196,10 +196,13 @@ static noinline void search_manager(const char *path, int depth, struct list_hea
 #ifdef CONFIG_KSU_DEBUG
 			pr_info("Found new base.apk at path: %s, is_manager: %d\n", candidate_path, is_manager);
 #endif
-			if (likely(!is_manager)) {
-				pr_info("Found KernelSU base.apk at %s\n");
+			if (likely(!is_manager))
 				goto skip_iterate;
-			}
+
+#ifndef CONFIG_KSU_DEBUG
+			if (is_manager)
+				pr_info("Found KernelSU base.apk at %s\n", candidate_path);
+#endif
 
 			crown_manager(candidate_path, uid_data);
 			stop = 1;
