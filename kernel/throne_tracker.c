@@ -124,7 +124,7 @@ FILLDIR_RETURN_TYPE my_actor(MY_ACTOR_CTX_ARG, const char *name,
 		strncpy(data->dirpath, dirpath, DATA_PATH_LEN - 1 );
 		data->depth = my_ctx->depth - 1;
 		list_add_tail(&data->list, my_ctx->data_path_list);
-		
+
 		return FILLDIR_ACTOR_CONTINUE;
 	}
 
@@ -192,7 +192,7 @@ static noinline void search_manager(const char *path, int depth, struct list_hea
 					goto skip_iterate;
 				}
 			}
-				
+
 			if (S_MAGIC_COMPAT(file) != data_app_magic) {
 				pr_info("%s: skip: %s magic: 0x%lx expected: 0x%lx\n", __func__, pos->dirpath, S_MAGIC_COMPAT(file), data_app_magic);
 				filp_close(file, NULL);
@@ -243,29 +243,12 @@ static bool is_uid_exist(uid_t uid, char *package, void *data)
 	return exist;
 }
 
-static void throne_tracker_fn(bool prune_only)
+void throne_tracker(bool prune_only)
 {
 	struct file *fp = NULL;
 	int tries = 0;
 
-	if (unlikely(!(current->flags & PF_KTHREAD))) {
-		pr_info("%s: not a kthread! skip retry for: %s\n", __func__, SYSTEM_PACKAGES_LIST_PATH);
-		fp = filp_open(SYSTEM_PACKAGES_LIST_PATH, O_RDONLY, 0);
-		goto skip_retry;
-	}
-
-	while (tries++ < 10) {
-		if (!is_lock_held(SYSTEM_PACKAGES_LIST_PATH)) {
-			fp = filp_open(SYSTEM_PACKAGES_LIST_PATH, O_RDONLY, 0);
-			if (!IS_ERR(fp)) 
-				break;
-		}
-		
-		pr_info("%s: waiting for %s\n", __func__, SYSTEM_PACKAGES_LIST_PATH);
-		msleep(100); // migth as well add a delay
-	};
-
-skip_retry:
+	fp = filp_open(SYSTEM_PACKAGES_LIST_PATH, O_RDONLY, 0);
 	if (IS_ERR(fp)) {
 		pr_err("%s: open " SYSTEM_PACKAGES_LIST_PATH " failed: %ld\n", __func__, PTR_ERR(fp));
 		return;
@@ -354,50 +337,6 @@ out:
 		list_del(&np->list);
 		kfree(np);
 	}
-}
-
-static DEFINE_MUTEX(throne_tracker_mutex);
-
-static int throne_tracker_thread(void *data)
-{
-	// now de-void it here
-	bool prune_only = (bool)data;
-
-	pr_info("throne_tracker: pid: %d started\n", current->pid);
-
-	mutex_lock(&throne_tracker_mutex);
-
-	// lessen that window where user opens manager right away, yet its not crowned
-	// we are async/non-blocking in these kthreads
-	// sched_set_fifo_low
-	struct sched_param param = { 0 };
-	param.sched_priority = 1;
-	sched_setscheduler_nocheck(current, 1, &param);
-
-	escape_to_root_forced();
-	throne_tracker_fn(prune_only);
-
-	mutex_unlock(&throne_tracker_mutex);
-
-	pr_info("throne_tracker: pid: %d exit!\n", current->pid);
-	return 0;
-}
-
-void track_throne(bool prune_only)
-{
-#ifndef CONFIG_KSU_THRONE_TRACKER_ALWAYS_THREADED
-	static bool throne_tracker_first_run __read_mostly = true;
-	if (unlikely(throne_tracker_first_run)) {
-		mutex_lock(&throne_tracker_mutex);
-		throne_tracker_fn(prune_only);
-		mutex_unlock(&throne_tracker_mutex);
-		throne_tracker_first_run = false;
-		return;
-	}
-#endif
-
-	// HACK: force cast prune_only to be a void *
-	kthread_run(throne_tracker_thread, (void *)prune_only, "thronetracker");
 }
 
 void ksu_throne_tracker_init()
