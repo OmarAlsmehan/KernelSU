@@ -243,7 +243,7 @@ static bool is_uid_exist(uid_t uid, char *package, void *data)
 	return exist;
 }
 
-void throne_tracker(bool prune_only)
+void track_throne(bool prune_only)
 {
 	struct file *fp = NULL;
 	int tries = 0;
