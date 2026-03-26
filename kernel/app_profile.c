@@ -112,7 +112,7 @@ void ksu_app_profile_init(void)
 	if (!root_groups)
 		pr_err("failed to allocate root_groups\n");
 	else
-		pr_info("allocated root_groups at %p\n", root_groups);
+		pr_info("allocated root_groups on 0x%p\n", root_groups);
 }
 
 int escape_with_root_profile(void)

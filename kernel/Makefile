@@ -6,10 +6,13 @@ CFLAGS_ksu.o += -I$(srctree)/security/selinux -I$(srctree)/security/selinux/incl
 CFLAGS_ksu.o += -I$(objtree)/security/selinux
 
 KDIR := $(KDIR)
-MDIR := $(realpath $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 
+# If KDIR not empty, then print it
+ifneq ($(KDIR),)
+MDIR := $(realpath $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 $(info -- KDIR: $(KDIR))
 $(info -- MDIR: $(MDIR))
+endif
 
 # compliant to last upstream kernel change as of 15790cc
 CFLAGS_ksu.o += -DKSU_VERSION=32400
@@ -27,9 +30,6 @@ CFLAGS_ksu.o += -DKSU_MANAGER_PACKAGE=\"$(KSU_MANAGER_PACKAGE)\"
 $(info -- KernelSU Manager package name: $(KSU_MANAGER_PACKAGE))
 endif
 
-$(info -- KernelSU Manager signature size: $(KSU_EXPECTED_SIZE))
-$(info -- KernelSU Manager signature hash: $(KSU_EXPECTED_HASH))
-
 CFLAGS_ksu.o += -DEXPECTED_SIZE=$(KSU_EXPECTED_SIZE)
 CFLAGS_ksu.o += -DEXPECTED_HASH=\"$(KSU_EXPECTED_HASH)\"
 
@@ -46,25 +46,11 @@ $(info -- KernelSU/compat: exported policy_rwlock found!)
 CFLAGS_ksu.o += -DKSU_COMPAT_HAS_EXPORTED_POLICY_RWLOCK
 endif
 
-# UL, look for read_iter on f_op struct
-ifeq ($(shell grep -q "read_iter" $(srctree)/include/linux/fs.h 2>/dev/null; echo $$?),0)
-$(info -- KernelSU/compat: f_op->read_iter found!)
-CFLAGS_ksu.o += -DKSU_HAS_FOP_READ_ITER
-endif
-
-# UL, look for iterate_dir on ‎fs/readdir.c
-ifeq ($(shell grep -q "^int iterate_dir" $(srctree)/fs/readdir.c 2>/dev/null; echo $$?),0)
-$(info -- KernelSU/compat: iterate_dir found!)
-CFLAGS_ksu.o += -DKSU_HAS_ITERATE_DIR
-endif
-
 ifeq ($(shell grep -q "selinux_inode" $(srctree)/security/selinux/include/objsec.h; echo $$?),0)
-$(info -- KernelSU/compat: selinux_inode() found)
 CFLAGS_ksu.o += -DKSU_HAS_SELINUX_INODE
 endif
 
 ifeq ($(shell grep -q "selinux_cred" $(srctree)/security/selinux/include/objsec.h; echo $$?),0)
-$(info -- KernelSU/compat: selinux_cred() found)
 CFLAGS_ksu.o += -DKSU_HAS_SELINUX_CRED
 endif
 
