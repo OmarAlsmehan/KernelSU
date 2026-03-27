@@ -146,7 +146,7 @@ fun AppProfileScreenMiuix(
                         AppIconImage(
                             packageInfo = state.appGroup.primary.packageInfo,
                             label = state.appGroup.primary.label,
-                            modifier = Modifier.size(54.dp)
+                            modifier = Modifier.size(64.dp)
                         )
                     },
                     appUid = state.uid,
@@ -206,7 +206,7 @@ private fun AppProfileInner(
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
-            insideMargin = PaddingValues(horizontal = 16.dp, vertical = 14.dp)
+            insideMargin = PaddingValues(start = 12.dp, end = 16.dp, top = 10.dp, bottom = 10.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -214,7 +214,7 @@ private fun AppProfileInner(
                 appIcon()
                 Column(
                     modifier = Modifier
-                        .padding(start = 16.dp, end = 8.dp)
+                        .padding(start = 12.dp, end = 8.dp)
                         .weight(1f),
                 ) {
                     Text(
@@ -310,7 +310,7 @@ private fun AppProfileInner(
                     Icon(
                         imageVector = Icons.Rounded.Security,
                         contentDescription = null,
-                        modifier = Modifier.padding(end = 16.dp),
+                        modifier = Modifier.padding(end = 6.dp),
                         tint = colorScheme.onBackground
                     )
                 },
@@ -607,7 +607,7 @@ private fun ProfileBox(
             startAction = {
                 Icon(
                     Icons.Rounded.AccountCircle,
-                    modifier = Modifier.padding(end = 16.dp),
+                    modifier = Modifier.padding(end = 6.dp),
                     contentDescription = null,
                     tint = colorScheme.onBackground
                 )
