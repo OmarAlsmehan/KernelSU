@@ -1290,11 +1290,14 @@ exit:
 
 static int copy_avtab(struct avtab *new_avtab, struct avtab *old_avtab)
 {
+<<<<<<< HEAD
 	int ret, i;
 	struct avtab_node *n, *p;
 	ret = avtab_alloc_dup(new_avtab, old_avtab);
 	if (ret < 0)
 		return ret;
+	// avtab_alloc_dup didn't zero it
+	new_avtab->nel = 0;
 
 	for (i = 0; i < old_avtab->nslot; i++) {
 		n = old_avtab->htable[i];
